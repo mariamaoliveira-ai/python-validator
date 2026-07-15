@@ -4,7 +4,7 @@ A web application that validates and corrects Python scripts using static analys
 
 ## Stack
 
-- **Backend:** FastAPI, SQLAlchemy, Alembic, PostgreSQL
+- **Backend:** FastAPI, SQLAlchemy, Alembic, SQLite
 - **Frontend:** React, TypeScript, Vite
 - **Tests:** Pytest (unit + integration), Vitest + React Testing Library (components), Cypress (E2E)
 - **Infrastructure:** Docker, Docker Compose
