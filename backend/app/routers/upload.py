@@ -19,14 +19,14 @@ def getMetadata(
         student_name=student_name
     )
 
-@router.post("/upload_file")
+@router.post("/upload")
 def upload_file(
     metadata: CreateFileUpload = Depends(getMetadata),
     file: UploadFile = File(...),
     executor: FileExecutor = Depends(getExecutor),
 ):
-    
-    result = executor.executeFile()
+    validatePythonFile(file)   
+    result = executor.executeFile(file.file.read())
     
     if result:
         return {
@@ -39,6 +39,16 @@ def upload_file(
             detail={
                 "message": "Submission Failed",
                  "execution_status": "Failed"
+            }
+        )
+
+def validatePythonFile(file):
+    if not file.filename.endswith(".py"):
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "message": "Invalid file format. Only .py files are allowed.",
+                "execution_status": "Failed"
             }
         )
   
