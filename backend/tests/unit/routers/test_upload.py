@@ -4,9 +4,9 @@ from app.main import app
 
 client = TestClient(app)
 
-@patch("app.routers.upload.FileExecutor.execute_file")
-def test_UploadFileWhenValidPayload(mock_process_file):
-    mock_process_file.return_value = True
+@patch("app.routers.upload.FileExecutor.executeFile")
+def test_UploadFileWhenValidPayload(mockProcessFile):
+    mockProcessFile.return_value = True
     
     metadata = {
         "student_name": "Maria"
@@ -24,12 +24,12 @@ def test_UploadFileWhenValidPayload(mock_process_file):
         "message": "File received: my_python_file.py",
         "execution_status": "Executed"
     }
-    mock_process_file.assert_called_once()
+    mockProcessFile.assert_called_once()
 
 
-@patch("app.routers.upload.FileExecutor.execute_file")
-def test_UploadFileWhenInvalidPayload(mock_process_file):
-    mock_process_file.return_value = False
+@patch("app.routers.upload.FileExecutor.executeFile")
+def test_UploadFileWhenInvalidPayload(mockProcessFile):
+    mockProcessFile.return_value = False
     payload = {
         "student_name": "Maria"
     }

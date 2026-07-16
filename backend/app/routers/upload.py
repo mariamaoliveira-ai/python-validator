@@ -26,7 +26,7 @@ def upload_file(
     executor: FileExecutor = Depends(getExecutor),
 ):
     
-    result = executor.execute_file()
+    result = executor.executeFile()
     
     if result:
         return {
