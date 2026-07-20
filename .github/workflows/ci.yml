@@ -7,8 +7,8 @@ on:
     branches: [main]
 
 jobs:
-  backend:
-    name: Backend (Python ${{ matrix.python-version }})
+  backend-tests:
+    name: Backend Tests (Python ${{ matrix.python-version }})
     runs-on: ubuntu-latest
 
     strategy:
@@ -38,9 +38,12 @@ jobs:
       - name: Run tests with coverage
         run: pytest backend/tests/ --cov=backend/app --cov-report=term-missing
 
-  frontend:
-    name: Frontend (Node 20)
+  frontend-tests:
+    name: Frontend Tests
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
 
     steps:
       - name: Checkout code
@@ -57,10 +60,74 @@ jobs:
         if: hashFiles('frontend/package.json') != ''
         run: npm ci --prefix frontend
 
-      - name: Type check
-        if: hashFiles('frontend/package.json') != ''
-        run: npm run typecheck --prefix frontend
+      - name: Install frontend deps
+        run: npm ci
 
-      - name: Run tests
-        if: hashFiles('frontend/package.json') != ''
-        run: npm run test --prefix frontend
+      - name: Run frontend tests
+        run: npm run test:run
+
+
+  functional-tests:
+    name: Functional Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: functional-tests
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install backend deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ./backend
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install frontend deps
+        working-directory: frontend
+        run: npm ci
+
+      - name: Install functional test deps
+        working-directory: functional-tests
+        run: npm ci
+
+      - name: Start backend
+        run: |
+          nohup python -m uvicorn app.main:app --app-dir backend --host 0.0.0.0 --port 8000 > backend.log 2>&1 &
+
+      - name: Start frontend
+        working-directory: frontend
+        run: |
+          nohup npm run dev -- --host 0.0.0.0 --port 3000 > ../frontend.log 2>&1 &
+
+      - name: Wait for services
+        run: |
+          for url in http://localhost:8000/docs http://localhost:3000; do
+            echo "Waiting for $url"
+            until curl -sSf "$url" > /dev/null; do
+              sleep 2
+            done
+          done
+
+      - name: Run Cypress
+        working-directory: functional-tests
+        run: npm run cypress:run
+
+      - name: Upload logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-logs
+          path: |
+            backend.log
+            frontend.log
