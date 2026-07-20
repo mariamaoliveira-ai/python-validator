@@ -26,8 +26,8 @@ def upload_file(
     executor: FileExecutor = Depends(getExecutor),
 ):
     validatePythonFile(file)   
-    # result = executor.executeFile(file.file.read())
-    result = True
+    result = executor.executeFile(file.file.read())
+    # result = True
 
     if result:
         return {
