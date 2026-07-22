@@ -16,6 +16,9 @@ env/
 .secret
 secrets.toml
 
+# SQLite database files
+*.db
+
 # Testing, coverage, and profiling
 .cache/
 .pytest_cache/
