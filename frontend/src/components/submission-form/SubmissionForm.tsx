@@ -8,13 +8,19 @@ function SubmissionForm() {
     const [studentName, setStudentName] = useState('')
     const [file, setFile] = useState<File | null>(null)
     const [responseMessage, setResponseMessage] = useState('')
+    const [statusMessage, setStatusMessage] = useState<'success' | 'error'>('success')
 
     async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault()
 
-        const response = await submitValidation({ studentName, file: file! })
-
-        setResponseMessage(response.message)
+        try{
+            const response = await submitValidation({ studentName, file: file! })
+            setStatusMessage('success')
+            setResponseMessage(response.message)
+        }catch(error){
+            setStatusMessage('error')
+            setResponseMessage(`Submission Failed: ${error}`)
+        }
     }
     
 
@@ -47,7 +53,7 @@ function SubmissionForm() {
                 </Button>
 
                 {responseMessage && (
-                    <Alert severity="success">{responseMessage}</Alert>
+                    <Alert severity={statusMessage}>{responseMessage}</Alert>
                 )}
             </Stack>
         </Box>

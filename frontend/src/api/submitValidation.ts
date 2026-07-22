@@ -22,7 +22,8 @@ export async function submitValidation(
     });
 
     if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+         const errorBody = await response.json().catch(() => null);
+        throw new Error(errorBody?.detail.message ?? `HTTP error! status: ${response.status}`);
     }
 
     return response.json() as Promise<ValidationResponse>;

@@ -19,6 +19,7 @@ describe('SubmissionForm', () => {
             expect(screen.getByRole('button', { name: /submit/i })).toBeInTheDocument()
         });
 
+
         it('should show success message when form is submitted successfully', async ()=>{
             const user = userEvent.setup()
             const mockedSubmit = vi.mocked(submitValidation)
@@ -33,9 +34,36 @@ describe('SubmissionForm', () => {
             const nameInput = screen.getByRole('textbox', { name: /student name/i })
             const fileInput = screen.getByLabelText(/python file/i)
             const submitButton = screen.getByRole('button', { name: /submit/i })
-
+            
             await user.type(nameInput, 'John Doe')
             await user.upload(fileInput, new File(['print("Hello World")'], 'hello.py', { type: 'text/x-python' }))
+            await user.click(submitButton)
+            
+            expect(mockedSubmit).toHaveBeenCalledWith({
+                studentName: 'John Doe',
+                file: expect.any(File),
+            })
+            
+            const alert = await screen.findByRole('alert')
+            expect(await screen.findByText(/file received: hello.py/i)).toBeInTheDocument()
+            expect(alert).toHaveClass('MuiAlert-colorSuccess')
+        });
+
+
+        it('should show error message when form submission fails', async ()=>{
+            const user = userEvent.setup()
+            const mockedSubmit = vi.mocked(submitValidation)
+
+            mockedSubmit.mockRejectedValueOnce(new Error('Execution failed with error: SyntaxError: invalid syntax'))
+
+            render(<SubmissionForm/>)
+
+            const nameInput = screen.getByRole('textbox', { name: /student name/i })
+            const fileInput = screen.getByLabelText(/python file/i)
+            const submitButton = screen.getByRole('button', { name: /submit/i })
+
+            await user.type(nameInput, 'John Doe')
+            await user.upload(fileInput, new File(['print("Hello World"'], 'hello.py', { type: 'text/x-python' }))
             await user.click(submitButton)
 
             expect(mockedSubmit).toHaveBeenCalledWith({
@@ -43,7 +71,9 @@ describe('SubmissionForm', () => {
                 file: expect.any(File),
             })
 
-            expect(await screen.findByText(/file received: hello.py/i)).toBeInTheDocument()
+            const alert = await screen.findByRole('alert')
+            expect(await screen.findByText(/execution failed with error/i)).toBeInTheDocument()
+            expect(alert).toHaveClass('MuiAlert-colorError')
         });
     });
 });
