@@ -17,5 +17,8 @@ dev = [
     "httpx2>=2.0.0",
 ]
 
+[tool.setuptools.packages.find]
+include = ["app*"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
