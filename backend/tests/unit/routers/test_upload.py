@@ -157,7 +157,7 @@ def test_UploadFileWhenUnknownErrorOccurs(mockProcessFile):
     assert response.status_code == 500
     assert response.json() == {
         "detail": {
-            "message": "An unexpected error occurred while processing your file.",
+            "message": "Unexpected error",
             "execution_status": "Failed"
         }
     }
