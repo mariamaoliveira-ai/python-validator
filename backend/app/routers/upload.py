@@ -1,15 +1,24 @@
 from datetime import datetime
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
+from sqlalchemy.orm import Session
 
-from ..schemas.file_validation import CreateFileUpload
+from app.database import get_db
+from app.models.submission import SubmissionModel
+from app.services.service_exceptions import ExecutionFileError, InvalidOutputError
+from app.services.submission import SubmissionService
+
+from ..schemas.submission import CreateFileUpload
 from ..services.file_executor import FileExecutor
 
 router = APIRouter()
 
-def getExecutor() -> FileExecutor:
-    """Dependency to provide FileExecutor singleton"""
-    return FileExecutor()
+
+def get_submission_service(
+    db: Session = Depends(get_db),
+    executor: FileExecutor = Depends(lambda: FileExecutor())
+) -> SubmissionService:
+    return SubmissionService(db=db, executor=executor)
 
 
 def getMetadata(
@@ -19,29 +28,42 @@ def getMetadata(
         student_name=student_name
     )
 
+
 @router.post("/upload")
 def upload_file(
     metadata: CreateFileUpload = Depends(getMetadata),
     file: UploadFile = File(...),
-    executor: FileExecutor = Depends(getExecutor),
+    service: SubmissionService = Depends(get_submission_service)
 ):
-    validatePythonFile(file)   
-    result = executor.executeFile(file.file.read())
-    # result = True
-
-    if result:
-        return {
-        "message": f"File received: {file.filename}",
-        "execution_status": "Executed"
-        }
-    else:
-        raise HTTPException(
-            status_code = 400,
-            detail={
-                "message": "Submission Failed",
-                 "execution_status": "Failed"
-            }
+    validatePythonFile(file)
+    try:
+        submission = service.processSubmission(
+            studentName=metadata.student_name,
+            fileName=file.filename,
+            fileBytes=file.file.read()
         )
+        
+        if submission.status == "FAILED":
+            raise HTTPException(
+                status_code=400,
+                detail={
+                    "message": submission.result_execution,
+                    "execution_status": "Failed"
+                }
+            )
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail={
+            "message": str(e),
+            "execution_status": "Failed"
+        })
+
+    return {
+        "message": submission.result_execution,
+        "execution_status": "Executed"
+    }
+        
 
 def validatePythonFile(file):
     if not file.filename.endswith(".py"):

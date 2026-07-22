@@ -1,5 +1,6 @@
 import pytest
 from app.services.file_executor import FileExecutor
+from app.services.service_exceptions import ExecutionFileError, InvalidOutputError
 
 @pytest.fixture
 def fileExecutor():
@@ -28,10 +29,22 @@ def test_ExecuteFileFailure(fileExecutor):
         result = num1 - num2
         print(result)
     """
+     
+    with pytest.raises(InvalidOutputError):
+        fileExecutor.executeFile(pythonCode)
+  
     
-    result = fileExecutor.executeFile(pythonCode)
-    assert result is False
+def test_ExecuteFileFailureBySyntaxError(fileExecutor):
+    pythonCode = b"""
+        num1 = int(input())
+        num2 = int(input()
+        result = num1 + num2
+        print(result)
+    """
     
+    with pytest.raises(ExecutionFileError):
+        fileExecutor.executeFile(pythonCode)
+     
     
 def test_ExecuteFileFailureByTimeOut(fileExecutor):
     pythonCode = b"""
@@ -39,7 +52,7 @@ def test_ExecuteFileFailureByTimeOut(fileExecutor):
             pass
     """
     
-    result = fileExecutor.executeFile(pythonCode)
-    assert result is False
+    with pytest.raises(TimeoutError):
+        fileExecutor.executeFile(pythonCode)
     
   

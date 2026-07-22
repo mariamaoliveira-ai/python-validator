@@ -4,6 +4,8 @@ import sys
 import os
 import textwrap
 
+from app.services.service_exceptions import ExecutionFileError, InvalidOutputError
+
 class FileExecutor:
 
     TIMEOUT_SECONDS = 3
@@ -32,13 +34,17 @@ class FileExecutor:
             )
             
             if result.returncode != 0:
-                return False
+                raise ExecutionFileError(f"Execution failed with error: {result.stderr.strip()}")
             
-            excutedOutput = result.stdout.strip()
-            return excutedOutput == expectedOutput.strip()
+            executedOutput = result.stdout.strip()
+            if executedOutput == expectedOutput.strip():
+                return True
+            else:
+                raise InvalidOutputError(f"Expected output: {expectedOutput} but got result: {executedOutput}")
+
         
-        except(subprocess.TimeoutExpired, Exception):
-            return False
+        except(subprocess.TimeoutExpired):
+            raise TimeoutError(f"Execution timed out after {self.TIMEOUT_SECONDS} seconds")
         
         finally:
             if os.path.exists(tempPath):

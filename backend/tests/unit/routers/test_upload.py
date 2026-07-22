@@ -1,12 +1,22 @@
 from fastapi.testclient import TestClient
 from unittest.mock import patch
+
+import pytest
 from app.main import app
+from app.services.service_exceptions import ExecutionFileError, InvalidOutputError
+from app.models.submission import SubmissionModel
 
 client = TestClient(app)
 
-@patch("app.routers.upload.FileExecutor.executeFile")
+@patch("app.routers.upload.SubmissionService.processSubmission")
 def test_UploadFileWhenValidPayload(mockProcessFile):
-    mockProcessFile.return_value = True
+    mockProcessFile.return_value = SubmissionModel(
+        id=1,
+        student_name="Maria",
+        file_name="my_python_file.py",
+        result_execution="Hello, World!",
+        status="SUCCESS"
+    )
     
     metadata = {
         "student_name": "Maria"
@@ -21,34 +31,96 @@ def test_UploadFileWhenValidPayload(mockProcessFile):
 
     assert response.status_code == 200
     assert response.json() == {
-        "message": "File received: my_python_file.py",
+        "message": "Hello, World!",
         "execution_status": "Executed"
     }
     mockProcessFile.assert_called_once()
 
-#TODO: Add tests depeding on the file executor's behavior, such as timeouts or exceptions.
-# @patch("app.routers.upload.FileExecutor.executeFile")
-# def test_UploadFileWhenInvalidPayload(mockProcessFile):
-#     mockProcessFile.return_value = False
-#     payload = {
-#         "student_name": "Maria"
-#     }
-#     fileContent = b"print('Hello, World!')"
-#     files = {
-#         "file": ("my_python_file.py", fileContent, "text/x-python")
-#     }
 
-#     response = client.post("/upload", data=payload, files=files)
+@patch("app.routers.upload.SubmissionService.processSubmission")
+def test_UploadFileWhenInvalidOutput(mockProcessFile):
+    mockProcessFile.return_value = SubmissionModel(
+        student_name="Maria",
+        file_name="my_python_file.py",
+        result_execution="Expected output: 5 but got result: Hello, World!",
+        status="FAILED"
+    )
+    payload = {
+        "student_name": "Maria"
+    }
+    fileContent = b"print('Hello, World!')"
+    files = {
+        "file": ("my_python_file.py", fileContent, "text/x-python")
+    }
 
-#     assert response.status_code == 400
-#     assert response.json() == {
-#         "detail": {
-#             "message": "Submission Failed",
-#             "execution_status": "Failed"
-#         }
-#     }
+    response = client.post("/upload", data=payload, files=files)
+    assert response.status_code == 400
+    assert response.json() == {
+            "detail": {
+                "message": "Expected output: 5 but got result: Hello, World!",
+                "execution_status": "Failed"
+            }
+        }
+    mockProcessFile.assert_called_once()
     
 
+@patch("app.routers.upload.SubmissionService.processSubmission")
+def test_UploadFileWhenExecutionError(mockProcessFile):
+    mockProcessFile.return_value = SubmissionModel(
+        student_name="Maria",
+        file_name="my_python_file.py",
+        result_execution="Execution failed with error: SyntaxError: invalid syntax",
+        status="FAILED"
+    )
+    payload = {
+        "student_name": "Maria"
+    }
+    fileContent = b"print('Hello, World!"
+    files = {
+        "file": ("my_python_file.py", fileContent, "text/x-python")
+    }
+
+    response = client.post("/upload", data=payload, files=files)
+    assert response.status_code == 400
+    assert response.json() == {
+            "detail": {
+                "message": "Execution failed with error: SyntaxError: invalid syntax",
+                "execution_status": "Failed"
+            }
+        }
+    mockProcessFile.assert_called_once()
+    
+    
+@patch("app.routers.upload.SubmissionService.processSubmission")
+def test_UploadFileWhenTimeoutError(mockProcessFile):
+    mockProcessFile.return_value = SubmissionModel(
+        student_name="Maria",
+        file_name="my_python_file.py",
+        result_execution="Execution timed out after 3 seconds",
+        status="FAILED"
+    )
+    payload = {
+        "student_name": "Maria"
+    }
+    fileContent = b"""
+        while True:
+            pass
+    """
+    files = {
+        "file": ("my_python_file.py", fileContent, "text/x-python")
+    }
+
+    response = client.post("/upload", data=payload, files=files)
+    assert response.status_code == 400
+    assert response.json() == {
+            "detail": {
+                "message": "Execution timed out after 3 seconds",
+                "execution_status": "Failed"
+            }
+        }
+    mockProcessFile.assert_called_once()
+    
+    
 def test_UploadFileWhenWrongFormat():
     payload = {
         "student_name": "Maria"
@@ -67,3 +139,26 @@ def test_UploadFileWhenWrongFormat():
             "execution_status": "Failed"
         }
     }
+
+@patch("app.routers.upload.SubmissionService.processSubmission",
+       side_effect=Exception("Unexpected error")   
+)
+def test_UploadFileWhenUnknownErrorOccurs(mockProcessFile):
+    payload = {
+        "student_name": "Maria"
+    }
+    fileContent = b"print('Hello, World!')"
+    files = {
+        "file": ("my_python_file.py", fileContent, "text/x-python")
+    }
+
+    response = client.post("/upload", data=payload, files=files)
+
+    assert response.status_code == 500
+    assert response.json() == {
+        "detail": {
+            "message": "An unexpected error occurred while processing your file.",
+            "execution_status": "Failed"
+        }
+    }
+    mockProcessFile.assert_called_once()
