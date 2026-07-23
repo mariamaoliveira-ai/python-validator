@@ -18,7 +18,7 @@ describe('File Upload Success Flow', () => {
     cy.get('#student-input').type(testDataValid.studentName);
 
     // Upload the valid Python file
-    cy.get('#file-upload').selectFile(`cypress/fixtures/${testDataValid.filename}`);
+    cy.get('#file-upload').selectFile(`cypress/fixtures/${testDataValid.filename}`, { force: true });
 
     // Submit the form
     cy.get('[name="submit"]').click();
@@ -34,7 +34,7 @@ describe('File Upload Success Flow', () => {
     cy.get('#student-input').type(testDataInValid.studentName);
 
     // Upload the invalid Python file
-    cy.get('#file-upload').selectFile(`cypress/fixtures/${testDataInValid.filename}`);
+    cy.get('#file-upload').selectFile(`cypress/fixtures/${testDataInValid.filename}`, { force: true });
 
     // Submit the form
     cy.get('[name="submit"]').click();
@@ -51,7 +51,7 @@ describe('File Upload Success Flow', () => {
     cy.get('#student-input').type(testDataValid.studentName);
 
     // Upload the valid Python file
-    cy.get('#file-upload').selectFile(`cypress/fixtures/${testDataValid.filename}`);
+    cy.get('#file-upload').selectFile(`cypress/fixtures/${testDataValid.filename}`, { force: true });
 
     // Submit the form
     cy.get('[name="submit"]').click();
