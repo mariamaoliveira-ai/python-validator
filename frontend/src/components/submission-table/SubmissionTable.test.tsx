@@ -41,8 +41,8 @@ describe('SubmissionTable', () => {
         it('should render text in green if status is SUCCESS and in red if status is FAILURE', ()=>{
             render(<SubmissionTable submissions={fakeSubmissions}/>)
 
-            expect(screen.getByText('SUCCESS')).toHaveClass('text-green-500')
-            expect(screen.getByText('FAILED')).toHaveClass('text-red-500')
+            expect(screen.getByText('SUCCESS')).toHaveClass('text-green-800')
+            expect(screen.getByText('FAILED')).toHaveClass('text-red-800')
         });
 
         it('It show a message if there are no submissions', ()=>{

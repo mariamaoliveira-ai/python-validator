@@ -11,12 +11,11 @@ export type ValidationResponse = {
 };
 
 export type Submission = {
-    timestamp: string | number | Date;
     student_name: string;
     file_name: string;
     status: string;
     result_execution: string;
-    created_at: string;
+    created_at: string | number | Date;
 };
 
 

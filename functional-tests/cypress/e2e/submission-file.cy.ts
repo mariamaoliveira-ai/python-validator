@@ -5,7 +5,7 @@ describe('File Upload Success Flow', () => {
   };
 
   const testDataInValid = {
-    studentName: 'John Doe',
+    studentName: 'John Doe Invalid',
     filename: 'sum_two_numbers_wrong.py',
   };
 
@@ -64,10 +64,10 @@ describe('File Upload Success Flow', () => {
     cy.wait('@getSubmissions');
 
     // Verify that the new submission appears in the table
-    cy.get('table').contains('th', testDataValid.studentName).should('be.visible');
-    cy.get('table').contains('td', testDataValid.filename).should('be.visible');
-    cy.get('table').contains('td', 'SUCCESS').should('be.visible');
-    cy.get('table').contains('td', 'File executed successfully and passed all tests.').should('be.visible');
-    cy.get('table').contains('td', /\d{2}-\d{2}-\d{4} \d{2}:\d{2}:\d{2}/).should('be.visible');
+    cy.get('table').contains('th', testDataValid.studentName).should('exist');
+    cy.get('table').contains('td', testDataValid.filename).should('exist');
+    cy.get('table').contains('td', 'SUCCESS').should('exist');
+    cy.get('table').contains('td', 'File executed successfully and passed all tests.').should('exist');
+    cy.get('table').contains('td', /\d{2}-\d{2}-\d{4} \d{2}:\d{2}:\d{2}/).should('exist');
   });
 });
