@@ -28,7 +28,7 @@ function SubmissionTable({ submissions }: { submissions: Submission[] }){
         <TableBody>
           {submissions.map((row) => (
             <TableRow
-              key={row.student_name}
+              key={`${row.student_name}-${row.created_at}`}
               sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
             >
                 <TableCell component="th" scope="row">

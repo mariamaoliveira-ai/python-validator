@@ -7,9 +7,13 @@ import { getSubmissions, type Submission } from './api/validatorApi'
 function App() {
   const [submissions, setSubmissions] = useState<Submission[]>([])
 
+  function orderSubmissionsByDate(submissions: Submission[]): Submission[] {
+    return submissions.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+  }
+
   function fetchSubmissions() {
     getSubmissions()
-    .then(setSubmissions)
+    .then((data) => setSubmissions(orderSubmissionsByDate(data)))
     .catch((error) => console.error('Failed to load submissions', error))
   }
 
