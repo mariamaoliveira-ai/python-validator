@@ -43,4 +43,26 @@ describe('File Upload Success Flow', () => {
     cy.get('[role="alert"]').should('be.visible');
     cy.get('[role="alert"]').should('contain', 'Submission Failed');
   });
+
+  it('should reload the table with new data when submission is made', () => {
+    // Fill in student name
+    cy.get('#student-input').type(testDataValid.studentName);
+
+    // Upload the valid Python file
+    cy.get('#file-upload').selectFile(`cypress/fixtures/${testDataValid.filename}`);
+
+    // Submit the form
+    cy.get('[name="submit"]').click();
+
+    // Verify success message appears
+    cy.get('[role="alert"]').should('be.visible');
+    cy.get('[role="alert"]').should('contain', 'File executed successfully and passed all tests.');
+
+    // Verify that the new submission appears in the table
+    cy.get('table').contains('th', testDataValid.studentName).should('be.visible');
+    cy.get('table').contains('td', testDataValid.filename).should('be.visible');
+    cy.get('table').contains('td', 'SUCCESS').should('be.visible');
+    cy.get('table').contains('td', 'File executed successfully and passed all tests.').should('be.visible');
+    cy.get('table').contains('td', /\d{2}-\d{2}-\d{4} \d{2}:\d{2}:\d{2}/).should('be.visible');
+  });
 });

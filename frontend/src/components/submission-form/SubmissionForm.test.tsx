@@ -3,9 +3,9 @@ import '@testing-library/jest-dom'
 import userEvent from '@testing-library/user-event'
 import { vi } from 'vitest'
 import SubmissionForm from './SubmissionForm'
-import { submitValidation } from '../../api/submitValidation'
+import { submitValidation } from '../../api/validatorApi'
 
-vi.mock('../../api/submitValidation')
+vi.mock('../../api/validatorApi')
 
 describe('SubmissionForm', () => {
 
@@ -49,6 +49,41 @@ describe('SubmissionForm', () => {
             expect(alert).toHaveClass('MuiAlert-colorSuccess')
         });
 
+
+        it('should call onSubmitComplete when form is submitted successfully', async ()=>{
+            const user = userEvent.setup()
+            const mockedSubmit = vi.mocked(submitValidation)
+            const onSubmitComplete = vi.fn()
+
+            mockedSubmit.mockResolvedValueOnce({
+                message: 'File received: hello.py',
+                execution_status: 'Executed',
+            })
+
+            render(<SubmissionForm onSubmitComplete={onSubmitComplete}/>)
+
+            await user.type(screen.getByRole('textbox', { name: /student name/i }), 'John Doe')
+            await user.upload(screen.getByLabelText(/python file/i), new File(['print("Hello World")'], 'hello.py', { type: 'text/x-python' }))
+            await user.click(screen.getByRole('button', { name: /submit/i }))
+
+            expect(onSubmitComplete).toHaveBeenCalledOnce()
+        });
+
+        it('should call onSubmitComplete even when form submission fails', async ()=>{
+            const user = userEvent.setup()
+            const mockedSubmit = vi.mocked(submitValidation)
+            const onSubmitComplete = vi.fn()
+
+            mockedSubmit.mockRejectedValueOnce(new Error('Execution failed with error: SyntaxError: invalid syntax'))
+
+            render(<SubmissionForm onSubmitComplete={onSubmitComplete}/>)
+
+            await user.type(screen.getByRole('textbox', { name: /student name/i }), 'John Doe')
+            await user.upload(screen.getByLabelText(/python file/i), new File(['print("Hello World"'], 'hello.py', { type: 'text/x-python' }))
+            await user.click(screen.getByRole('button', { name: /submit/i }))
+
+            expect(onSubmitComplete).toHaveBeenCalledOnce()
+        });
 
         it('should show error message when form submission fails', async ()=>{
             const user = userEvent.setup()

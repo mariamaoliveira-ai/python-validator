@@ -10,6 +10,15 @@ export type ValidationResponse = {
     execution_status: string;
 };
 
+export type Submission = {
+    student_name: string;
+    file_name: string;
+    status: string;
+    result_execution: string;
+    created_at: string;
+};
+
+
 export async function submitValidation(
     payload: ValidationRequest): Promise<ValidationResponse> {
     const formData = new FormData();
@@ -22,10 +31,19 @@ export async function submitValidation(
     });
 
     if (!response.ok) {
-         const errorBody = await response.json().catch(() => null);
+        const errorBody = await response.json().catch(() => null);
         throw new Error(errorBody?.detail.message ?? `HTTP error! status: ${response.status}`);
     }
 
     return response.json() as Promise<ValidationResponse>;
 
+}
+
+
+export async function getSubmissions(): Promise<Submission[]> {
+    const response = await fetch(`${API_BASE_URL}/submissions`);
+    if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+    }   
+    return response.json() as Promise<Submission[]>;
 }

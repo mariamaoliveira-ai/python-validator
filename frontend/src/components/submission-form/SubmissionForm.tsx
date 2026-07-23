@@ -2,9 +2,10 @@ import { Alert, Box, Button, Stack, TextField, Typography } from '@mui/material'
 
 
 import { useState } from 'react'
-import { submitValidation } from '../../api/submitValidation'
+import { submitValidation } from '../../api/validatorApi'
 
-function SubmissionForm() {
+
+function SubmissionForm({ onSubmitComplete }: { onSubmitComplete?: () => void }) {
     const [studentName, setStudentName] = useState('')
     const [file, setFile] = useState<File | null>(null)
     const [responseMessage, setResponseMessage] = useState('')
@@ -20,6 +21,8 @@ function SubmissionForm() {
         }catch(error){
             setStatusMessage('error')
             setResponseMessage(`Submission Failed: ${error}`)
+        }finally{
+            onSubmitComplete?.()
         }
     }
     
