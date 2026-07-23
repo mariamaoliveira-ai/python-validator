@@ -8,7 +8,7 @@ from app.models.submission import SubmissionModel
 from app.services.service_exceptions import ExecutionFileError, InvalidOutputError
 from app.services.submission import SubmissionService
 
-from ..schemas.submission import CreateFileUpload
+from ..schemas.submission import CreateFileUpload, SubmissionResponse
 from ..services.file_executor import FileExecutor
 
 router = APIRouter()
@@ -75,7 +75,8 @@ def validatePythonFile(file):
             }
         )
         
-@router.get("/submissions")
+        
+@router.get("/submissions", response_model=list[SubmissionResponse])
 def get_all_submissions(
     service: SubmissionService = Depends(get_submission_service)
 ):

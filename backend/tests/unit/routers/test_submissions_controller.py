@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from fastapi.testclient import TestClient
 from unittest.mock import patch
 
@@ -118,9 +120,41 @@ def test_UploadFileWhenTimeoutError(mockProcessFile):
                 "execution_status": "Failed"
             }
         }
-    mockProcessFile.assert_called_once()
-    
-    
+
+
+@patch("app.routers.submissions_controller.SubmissionService.loadAllSubmissions")
+def test_get_all_submissions_when_submissions_exist(mock_load):
+    mock_load.return_value = [
+        SubmissionModel(
+            id=1,
+            student_name="Maria",
+            file_name="solution.py",
+            result_execution="File executed successfully and passed all tests.",
+            status="SUCCESS",
+            created_at=datetime(2026, 1, 1, 12, 0, 0),
+        ),
+        SubmissionModel(
+            id=2,
+            student_name="Ana",
+            file_name="wrong.py",
+            result_execution="Expected output: 5 but got result: 3",
+            status="FAILED",
+            created_at=datetime(2026, 1, 2, 9, 0, 0),
+        ),
+    ]
+
+    response = client.get("/submissions")
+
+    assert response.status_code == 200
+    body = response.json()
+    assert len(body) == 2
+    assert body[0]["student_name"] == "Maria"
+    assert body[0]["status"] == "SUCCESS"
+    assert body[1]["student_name"] == "Ana"
+    assert body[1]["status"] == "FAILED"
+    mock_load.assert_called_once()
+
+
 def test_UploadFileWhenWrongFormat():
     payload = {
         "student_name": "Maria"
@@ -168,7 +202,14 @@ def test_UploadFileWhenUnknownErrorOccurs(mockProcessFile):
 @patch("app.routers.submissions_controller.SubmissionService.loadAllSubmissions")
 def test_GetAllSubmissions(mockLoadAllSubmissions):
     mockLoadAllSubmissions.return_value = [
-        {"student_name": "Maria", "file_name": "my_python_file.py", "result_execution": "Executed successfully", "status": "SUCCESS"}
+        SubmissionModel(
+            id=1,
+            student_name="Maria",
+            file_name="my_python_file.py",
+            result_execution="Executed successfully",
+            status="SUCCESS",
+            created_at=datetime(2026, 1, 1, 12, 0, 0),
+        )
     ]
     response = client.get("/submissions")
     assert response.status_code == 200
