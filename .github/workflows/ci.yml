@@ -131,3 +131,11 @@ jobs:
           path: |
             backend.log
             frontend.log
+
+      - name: Upload Cypress Screenshots on Failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-screenshots
+          path: functional-tests/cypress/screenshots
+          retention-days: 7
