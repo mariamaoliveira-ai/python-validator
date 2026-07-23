@@ -21,8 +21,8 @@ function SubmissionTable({ submissions }: { submissions: Submission[] }) {
             <TableCell>Student Name</TableCell>
             <TableCell align="center">File Name</TableCell>
             <TableCell align="center">Status</TableCell>
-            <TableCell align="left">Result Execution</TableCell>
-            <TableCell align="left" sx={{ width: 200 }}>Created At</TableCell>
+            <TableCell align="center" sx={{ width: 400 }}>Result Execution</TableCell>
+            <TableCell align="center" sx={{ width: 200 }}>Created At</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -34,7 +34,7 @@ function SubmissionTable({ submissions }: { submissions: Submission[] }) {
               <TableCell component="th" scope="row">
                 {row.student_name}
               </TableCell>
-              <TableCell align="center">
+              <TableCell align="left">
                 {row.file_name}
               </TableCell>
               <TableCell align="center">
@@ -47,10 +47,10 @@ function SubmissionTable({ submissions }: { submissions: Submission[] }) {
                   {row.status}
                 </span>
               </TableCell>
-              <TableCell align="left">
+              <TableCell align="left" sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {row.result_execution}
               </TableCell>
-              <TableCell align="left">
+              <TableCell align="center">
                 {format(new Date(row.created_at), 'dd-MM-yyyy HH:mm:ss')}
               </TableCell>
             </TableRow>
