@@ -1,8 +1,8 @@
-import { Alert, Box, Button, CircularProgress, Stack, TextField, Typography } from '@mui/material'
+import { Alert, Box, Button, CircularProgress, Stack, TextField } from '@mui/material'
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { submitValidation } from '../../api/validatorApi'
 
 
