@@ -1,4 +1,5 @@
 import { Alert, Box, Button, CircularProgress, Stack, TextField, Typography } from '@mui/material'
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 
 
 import { useEffect, useState } from 'react'
@@ -35,48 +36,56 @@ function SubmissionForm({ onSubmitComplete }: { onSubmitComplete?: () => void })
     
 
     return (
-        <Box component="form" onSubmit={handleSubmit}>
-            <Stack spacing={2}>
-                {responseMessage && (
-                    <Alert 
-                        severity={statusMessage}
-                        onClose={() => setResponseMessage('')}
-                    >
-                    {responseMessage}
-                    </Alert>
-                )}
+        <div>
+            <h2 className="text-lg font-semibold text-slate-700 mb-4">Submit Your Solution</h2> 
+            <Box component="form" onSubmit={handleSubmit}>
+                <Stack spacing={2}>
+                    {responseMessage && (
+                        <Alert 
+                            severity={statusMessage}
+                            onClose={() => setResponseMessage('')}
+                        >
+                        {responseMessage}
+                        </Alert>
+                    )}
 
-                <TextField 
-                    id="student-input" 
-                    label="Student Name" 
-                    variant="filled" 
-                    name="studentName"
-                    value={studentName}
-                    onChange={(event) => setStudentName(event.target.value)}
-                />
-                <div>
-                    <Typography variant="body1" component="label" htmlFor="file-upload">
-                        Python File
-                    </Typography>
-                    <input 
-                    id="file-upload" 
-                    type="file" 
-                    accept=".py"
-                    onChange={(event) => setFile(event.target.files ? event.target.files[0] : null)}
-                    key={fileInputKey}
+                    <TextField 
+                        id="student-input" 
+                        label="Student Name" 
+                        variant="outlined" 
+                        name="studentName"
+                        value={studentName}
+                        onChange={(event) => setStudentName(event.target.value)}
                     />
-                </div>
-                <Button 
-                    variant="contained"
-                    type="submit"
-                    name="submit"
-                     disabled={isLoading}
-                    startIcon={isLoading ? <CircularProgress size={16} color="inherit" /> : undefined}
-                >
-                    {isLoading ? 'Submitting...' : 'Submit'}
-                </Button>
-            </Stack>
-        </Box>
+                    <label
+                    htmlFor="file-upload"
+                    className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-slate-300 rounded-lg cursor-pointer bg-slate-50 hover:bg-slate-100 transition-colors"
+                    >
+                    <CloudUploadIcon className="text-slate-400 mb-2" sx={{ fontSize: 32 }} />
+                    <span className="text-sm text-slate-500">
+                        {file ? file.name : 'Click to upload a .py file'}
+                    </span>
+                    <input
+                        id="file-upload"
+                        type="file"
+                        accept=".py"
+                        className="hidden"
+                        onChange={(event) => setFile(event.target.files ? event.target.files[0] : null)}
+                        key={fileInputKey}
+                    />
+                    </label>
+                    <Button 
+                        variant="contained"
+                        type="submit"
+                        name="submit"
+                        disabled={isLoading}
+                        startIcon={isLoading ? <CircularProgress size={16} color="inherit" /> : undefined}
+                    >
+                        {isLoading ? 'Submitting...' : 'Submit'}
+                    </Button>
+                </Stack>
+            </Box>
+        </div>
     )
 
 }
