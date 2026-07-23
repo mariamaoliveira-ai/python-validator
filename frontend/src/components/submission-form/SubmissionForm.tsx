@@ -72,6 +72,7 @@ function SubmissionForm({ onSubmitComplete }: { onSubmitComplete?: () => void })
                         className="hidden"
                         onChange={(event) => setFile(event.target.files ? event.target.files[0] : null)}
                         key={fileInputKey}
+                        data-testid="file-upload"
                     />
                     </label>
                     <Button 

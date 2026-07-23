@@ -61,7 +61,7 @@ describe('App', () => {
     mockedGetSubmissions.mockResolvedValueOnce([...fakeSubmissions, newSubmission])
 
     const nameInput = screen.getByRole('textbox', { name: /student name/i })
-    const fileInput = screen.getByLabelText(/python file/i)
+    const fileInput = screen.getByTestId('file-upload')
     const submitButton = screen.getByRole('button', { name: /submit/i })
 
     await user.type(nameInput, 'Jane Smith')
@@ -100,7 +100,7 @@ describe('App', () => {
     mockedGetSubmissions.mockResolvedValueOnce([...fakeSubmissions, newSubmission])
 
     const nameInput = screen.getByRole('textbox', { name: /student name/i })
-    const fileInput = screen.getByLabelText(/python file/i)
+    const fileInput = screen.getByTestId('file-upload')
     const submitButton = screen.getByRole('button', { name: /submit/i })
 
     await user.type(nameInput, 'Jane Smith')

@@ -15,7 +15,7 @@ describe('SubmissionForm', () => {
             render(<SubmissionForm/>)
 
             expect(screen.getByRole('textbox', { name: /student name/i })).toBeInTheDocument()
-            expect(screen.getByLabelText(/python file/i)).toBeInTheDocument()
+            expect(screen.getByTestId('file-upload')).toBeInTheDocument()
             expect(screen.getByRole('button', { name: /submit/i })).toBeInTheDocument()
         });
 
@@ -32,7 +32,7 @@ describe('SubmissionForm', () => {
             render(<SubmissionForm/>)
 
             const nameInput = screen.getByRole('textbox', { name: /student name/i })
-            const fileInput = screen.getByLabelText(/python file/i)
+            const fileInput = screen.getByTestId('file-upload')
             const submitButton = screen.getByRole('button', { name: /submit/i })
             
             await user.type(nameInput, 'John Doe')
@@ -63,7 +63,7 @@ describe('SubmissionForm', () => {
             render(<SubmissionForm onSubmitComplete={onSubmitComplete}/>)
 
             await user.type(screen.getByRole('textbox', { name: /student name/i }), 'John Doe')
-            await user.upload(screen.getByLabelText(/python file/i), new File(['print("Hello World")'], 'hello.py', { type: 'text/x-python' }))
+            await user.upload(screen.getByTestId('file-upload'), new File(['print("Hello World")'], 'hello.py', { type: 'text/x-python' }))
             await user.click(screen.getByRole('button', { name: /submit/i }))
 
             expect(onSubmitComplete).toHaveBeenCalledOnce()
@@ -79,7 +79,7 @@ describe('SubmissionForm', () => {
             render(<SubmissionForm onSubmitComplete={onSubmitComplete}/>)
 
             await user.type(screen.getByRole('textbox', { name: /student name/i }), 'John Doe')
-            await user.upload(screen.getByLabelText(/python file/i), new File(['print("Hello World"'], 'hello.py', { type: 'text/x-python' }))
+            await user.upload(screen.getByTestId('file-upload'), new File(['print("Hello World"'], 'hello.py', { type: 'text/x-python' }))
             await user.click(screen.getByRole('button', { name: /submit/i }))
 
             expect(onSubmitComplete).toHaveBeenCalledOnce()
@@ -94,7 +94,7 @@ describe('SubmissionForm', () => {
             render(<SubmissionForm/>)
 
             const nameInput = screen.getByRole('textbox', { name: /student name/i })
-            const fileInput = screen.getByLabelText(/python file/i)
+            const fileInput = screen.getByTestId('file-upload')
             const submitButton = screen.getByRole('button', { name: /submit/i })
 
             await user.type(nameInput, 'John Doe')
