@@ -8,7 +8,9 @@ function App() {
   const [submissions, setSubmissions] = useState<Submission[]>([])
 
   function fetchSubmissions() {
-    getSubmissions().then(setSubmissions)
+    getSubmissions()
+    .then(setSubmissions)
+    .catch((error) => console.error('Failed to load submissions', error))
   }
 
   useEffect(() => {
