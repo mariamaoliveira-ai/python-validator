@@ -34,3 +34,33 @@ def test_shouldSaveSubmissionDetailsInDatabase(db_session):
     assert new_submission.id is not None
     assert new_submission.student_name == "Aluno Mock"
     assert new_submission.status == "SUCCESS"
+    
+    
+def test_shouldLoadAllSubmissionDetailsFromDatabase(db_session):
+    
+    new_submission_1 = SubmissionModel(
+        student_name = "Aluno Mock",
+        file_name = "solucao.py",
+        status = "SUCCESS",
+        result_execution = "Resultado da execução do código"
+    )
+    
+    new_submission_2 = SubmissionModel(
+        student_name = "Aluno Mock 2",
+        file_name = "solucao2.py",
+        status = "FAILURE",
+        result_execution = "Resultado da execução do código 2"
+    )
+    
+    db_session.add(new_submission_1)
+    db_session.add(new_submission_2)
+    db_session.commit()
+    
+    db_submissions = db_session.query(SubmissionModel).all()
+    assert len(db_submissions) == 2
+    assert db_submissions[0].student_name == "Aluno Mock"
+    assert db_submissions[0].status == "SUCCESS"
+    assert db_submissions[1].student_name == "Aluno Mock 2"
+    assert db_submissions[1].status == "FAILURE"
+
+    

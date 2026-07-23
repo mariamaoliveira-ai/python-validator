@@ -8,7 +8,7 @@ from app.models.submission import SubmissionModel
 
 client = TestClient(app)
 
-@patch("app.routers.upload.SubmissionService.processSubmission")
+@patch("app.routers.submissions_controller.SubmissionService.processSubmission")
 def test_UploadFileWhenValidPayload(mockProcessFile):
     mockProcessFile.return_value = SubmissionModel(
         id=1,
@@ -37,7 +37,7 @@ def test_UploadFileWhenValidPayload(mockProcessFile):
     mockProcessFile.assert_called_once()
 
 
-@patch("app.routers.upload.SubmissionService.processSubmission")
+@patch("app.routers.submissions_controller.SubmissionService.processSubmission")
 def test_UploadFileWhenInvalidOutput(mockProcessFile):
     mockProcessFile.return_value = SubmissionModel(
         student_name="Maria",
@@ -64,7 +64,7 @@ def test_UploadFileWhenInvalidOutput(mockProcessFile):
     mockProcessFile.assert_called_once()
     
 
-@patch("app.routers.upload.SubmissionService.processSubmission")
+@patch("app.routers.submissions_controller.SubmissionService.processSubmission")
 def test_UploadFileWhenExecutionError(mockProcessFile):
     mockProcessFile.return_value = SubmissionModel(
         student_name="Maria",
@@ -91,7 +91,7 @@ def test_UploadFileWhenExecutionError(mockProcessFile):
     mockProcessFile.assert_called_once()
     
     
-@patch("app.routers.upload.SubmissionService.processSubmission")
+@patch("app.routers.submissions_controller.SubmissionService.processSubmission")
 def test_UploadFileWhenTimeoutError(mockProcessFile):
     mockProcessFile.return_value = SubmissionModel(
         student_name="Maria",
@@ -139,8 +139,10 @@ def test_UploadFileWhenWrongFormat():
             "execution_status": "Failed"
         }
     }
+    
 
-@patch("app.routers.upload.SubmissionService.processSubmission",
+
+@patch("app.routers.submissions_controller.SubmissionService.processSubmission",
        side_effect=Exception("Unexpected error")   
 )
 def test_UploadFileWhenUnknownErrorOccurs(mockProcessFile):
@@ -162,3 +164,28 @@ def test_UploadFileWhenUnknownErrorOccurs(mockProcessFile):
         }
     }
     mockProcessFile.assert_called_once()
+    
+@patch("app.routers.submissions_controller.SubmissionService.loadAllSubmissions")
+def test_GetAllSubmissions(mockLoadAllSubmissions):
+    mockLoadAllSubmissions.return_value = [
+        {"student_name": "Maria", "file_name": "my_python_file.py", "result_execution": "Executed successfully", "status": "SUCCESS"}
+    ]
+    response = client.get("/submissions")
+    assert response.status_code == 200
+    assert isinstance(response.json(), list)
+    mockLoadAllSubmissions.assert_called_once()
+    
+
+@patch("app.routers.submissions_controller.SubmissionService.loadAllSubmissions",
+       side_effect=Exception("Unexpected error")   
+)
+def test_GetAllSubmissionsWhenErrorOccurs(mockLoadAllSubmissions):
+    response = client.get("/submissions")
+    assert response.status_code == 500
+    assert response.json() == {
+        "detail": {
+            "message": "Unexpected error",
+            "execution_status": "Failed"
+        }
+    }
+    mockLoadAllSubmissions.assert_called_once()

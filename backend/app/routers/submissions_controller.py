@@ -74,4 +74,18 @@ def validatePythonFile(file):
                 "execution_status": "Failed"
             }
         )
+        
+@router.get("/submissions")
+def get_all_submissions(
+    service: SubmissionService = Depends(get_submission_service)
+):
+    try:
+        submissions = service.loadAllSubmissions()
+        return submissions
+    except Exception as e:
+        raise HTTPException(status_code=500, detail={
+            "message": str(e),
+            "execution_status": "Failed"
+        })
+
   

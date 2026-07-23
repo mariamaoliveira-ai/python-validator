@@ -40,3 +40,7 @@ class SubmissionService:
         self.db.refresh(submission)
         
         return submission
+    
+    def loadAllSubmissions(self):
+        submissions = self.db.query(SubmissionModel).all()
+        return submissions
